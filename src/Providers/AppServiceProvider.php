@@ -2,14 +2,16 @@
 
 namespace Gogol\VpsManager\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Foundation\Http\Kernel;
 use Admin;
+use Gogol\VpsManager\Providers\CommandsRegisterServiceProvider;
+use Illuminate\Foundation\Http\Kernel;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
     protected $providers = [
         PublishServiceProvider::class,
+        CommandsRegisterServiceProvider::class,
     ];
 
     protected $facades = [
