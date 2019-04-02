@@ -17,7 +17,7 @@ class CommandsRegisterServiceProvider extends ServiceProvider {
          * Register commands
          */
         $this->commands([
-            \Gogol\VpsManager\Commands\ManagerInstallCommand::class
+            //..
         ]);
     }
 }

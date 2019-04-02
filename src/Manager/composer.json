@@ -1,0 +1,14 @@
+{
+    "name": "marekgogol/manager",
+    "description": "Manage server configuration",
+    "type": "metapackage",
+    "require": {
+        "php": ">=7.0"
+    },
+    "authors": [
+        {
+            "name": "Marek Gogol",
+            "email": "info@marekgogol.sk"
+        }
+    ]
+}
