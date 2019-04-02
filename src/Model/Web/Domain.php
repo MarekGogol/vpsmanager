@@ -4,6 +4,7 @@ namespace Gogol\VpsManager\Model\Web;
 
 use Gogol\Admin\Fields\Group;
 use Gogol\Admin\Models\Model as AdminModel;
+use Gogol\VpsManager\Admin\Buttons\CreateDomainButton;
 
 class Domain extends AdminModel
 {
@@ -28,6 +29,10 @@ class Domain extends AdminModel
      */
     protected $fields = [
         'name' => 'name:Názov webu|required|max:30',
+    ];
+
+    protected $buttons = [
+        CreateDomainButton::class,
     ];
 
 }

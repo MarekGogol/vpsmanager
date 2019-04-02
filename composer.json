@@ -20,7 +20,8 @@
             "Gogol\\VpsManager\\": "src"
         },
         "files": [
-            "src/Helpers/helpers.php"
+            "src/Helpers/helpers.php",
+            "src/App/Helpers/helpers.php"
         ]
     },
     "extra": {
