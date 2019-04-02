@@ -1,0 +1,33 @@
+{
+    "name": "marekgogol/vpsmanager",
+    "type": "library",
+    "description": "Package with VPS hosting manager feature into CrudAdmin",
+    "keywords": ["crudadmin", "vpsmanager", "hosting", "crudadmin", "laravel"],
+    "homepage": "https://marekgogol.sk",
+    "license": "MIT",
+    "authors": [
+        { "name": "Marek Gogoľ", "email": "info@marekgogol.sk" }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "laravel/framework": "^5.4",
+        "phpoffice/phpspreadsheet" : "^1.2.0",
+        "propaganistas/laravel-phone": "^4.0",
+        "marekgogol/crudadmin": "^1.2|dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "Gogol\\VpsManager\\": "src"
+        },
+        "files": [
+            "src/Helpers/helpers.php"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Gogol\\VpsManager\\Providers\\AppServiceProvider"
+            ]
+        }
+    }
+}
