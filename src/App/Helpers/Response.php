@@ -74,7 +74,7 @@ class Response
 
         $separator = ($separator ? "\n" : null);
 
-        vpsManager()->getOutput()->writeln($separator.$this->message.$separator);
+        vpsManager()->getOutput()->writeln($this->message.$separator);
 
         return $this;
     }

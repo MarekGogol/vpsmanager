@@ -95,7 +95,7 @@ class PHP extends Application
         if ( ! $stub->save($this->getPoolPath($domain, $php_version)) )
             return $this->response()->error('Súbor pre PHP pool sa nepodarilo uložiť.');
 
-        return $this->response()->success('PHP pool bol úspešne vytvorený.');
+        return $this->response()->success('PHP Pool pre web <info>'.$domain.'</info> bol úspešne vytvorený.');
     }
 
     /*

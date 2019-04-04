@@ -257,6 +257,6 @@ class InstallManagerCommand extends Command
         ]))->isError() )
             throw new \Exception($response->message);
 
-        dd($response);
+        $output->writeln('<info>'.$response->message.'</info>');
     }
 }

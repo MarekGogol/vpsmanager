@@ -46,6 +46,23 @@ else
 fi
 
 # Check if mysql is installed
+dpkg -s cerbot &> /dev/null
+IS_CERTBOT=$?
+if [ $IS_CERTBOT -eq 0 ]; then
+    echo "Cerbot is installed."
+else
+    echo "Cerbot is not installed"
+
+    read -p "Do you want to install Cerbot? [Y/n]: " answer
+    answer=${answer:Y}
+
+    if [[ $answer =~ [Yy] ]]; then
+        add-apt-repository -y ppa:certbot/certbot
+        apt install -y python-certbot-nginx
+    fi
+fi
+
+# Check if mysql is installed
 dpkg -s mysql-server &> /dev/null
 IS_MYSQL=$?
 if [ $IS_MYSQL -eq 0 ]; then

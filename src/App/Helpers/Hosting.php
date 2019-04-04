@@ -61,6 +61,10 @@ class Hosting extends Application
         if ( ($response = $this->server()->createUser($domain)->writeln(true))->isError() )
             return $response;
 
+        //Create mysql database
+        if ( ($response = $this->mysql()->createDatabase($domain)->writeln(true))->isError() )
+            return $response;
+
         // Create domain directory tree
         if ( ($response = $this->server()->createDomainTree($domain, $config)->writeln())->isError() )
             return $response;
@@ -73,11 +77,7 @@ class Hosting extends Application
         if ( ($response = $this->nginx()->createHost($domain, $config)->writeln())->isError() )
             return $response;
 
-        //Create mysql database
-        if ( ($response = $this->mysql()->createDatabase($domain)->writeln(true))->isError() )
-            return $response;
-
-        return $this->response()->success('Hosting bol úspešne vytvorený');
+        return $this->response()->success("\n".'Hosting bol úspešne vytvorený!');
     }
 }
 ?>

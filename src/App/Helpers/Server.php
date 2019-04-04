@@ -118,7 +118,7 @@ class Server extends Application
 
         }
 
-        return $this->response()->success('Priečinky webu, jeho práva boli úspešne vytvorené a nastavené.');
+        return $this->response()->success('Priečinok webu <info>'.$web_path.'</info> a jeho práva boli úspešne vytvorené a nastavené.');
     }
 }
 

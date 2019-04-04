@@ -60,7 +60,7 @@ class Nginx extends Application
         if ( ! $this->allowHost($domain) )
             return $this->response()->error('Nepodarilo sa vytvoriť odkaz na host v priečinku sites-enabled.');
 
-        return $this->response()->success('NGINX host '.$domain.' bol úspešne vytvorený.');
+        return $this->response()->success('NGINX host <info>'.$domain.'</info> bol úspešne vytvorený.');
     }
 
     public function removeHost($domain)
