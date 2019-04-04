@@ -61,9 +61,9 @@ class Hosting extends Application
         if ( ($response = $this->server()->createUser($domain)->writeln())->isError() )
             return $response;
 
-        // //Create domain directory tree
-        // if ( ($response = $this->server()->createDomainTree($domain, $config)->writeln())->isError() )
-        //     return $response;
+        // Create domain directory tree
+        if ( ($response = $this->server()->createDomainTree($domain, $config)->writeln())->isError() )
+            return $response;
 
         // Create php pool
         if ( ($response = $this->php()->createPool($domain, $config)->writeln())->isError() )
