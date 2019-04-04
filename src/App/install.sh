@@ -45,6 +45,23 @@ else
     fi
 fi
 
+# Check if mysql is installed
+dpkg -s mysql-server &> /dev/null
+IS_MYSQL=$?
+if [ $IS_MYSQL -eq 0 ]; then
+    echo "MySQL is installed."
+else
+    echo "MySQL is not installed"
+
+    read -p "Do you want to install MySQL? [Y/n]: " answer
+    answer=${answer:Y}
+
+    if [[ $answer =~ [Yy] ]]; then
+        apt install mysql-server
+        mysql_secure_installation
+    fi
+fi
+
 # Check if composer is installed
 dpkg -s composer &> /dev/null
 IS_COMPOSER=$?

@@ -41,6 +41,9 @@ if ( ! function_exists('trim_end') ) {
     }
 }
 
+/*
+ * Return password
+ */
 function getRandomPassword($length = 16)
 {
     $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ?:!._';

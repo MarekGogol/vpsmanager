@@ -22,7 +22,8 @@ class InstallManagerCommand extends Command
              ->setDescription('Install VPS Manager')
              ->addOption('dev', null, InputOption::VALUE_OPTIONAL, 'Use dev version of installation', null)
              ->addOption('vpsmanager_path', null, InputOption::VALUE_OPTIONAL, 'Set absolute path of VPS Manager web interface', null)
-             ->addOption('open_basedir', null, InputOption::VALUE_OPTIONAL, 'Allow open_basedir path for VPS Manager web interface', null);
+             ->addOption('open_basedir', null, InputOption::VALUE_OPTIONAL, 'Allow open_basedir path for VPS Manager web interface', null)
+             ->addOption('no_chmod', null, InputOption::VALUE_OPTIONAL, 'Disable change of chmod settings of web directory', null);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -251,7 +252,8 @@ class InstallManagerCommand extends Command
 
         if ( ($response = vpsManager()->hosting()->create($host_name, [
             'www_path' => $this->getManagerPath(),
-            'open_basedir' => $input->getOption('open_basedir')
+            'open_basedir' => $input->getOption('open_basedir'),
+            'no_chmod' => $input->getOption('no_chmod'),
         ]))->isError() )
             throw new \Exception($response->message);
 

@@ -67,12 +67,14 @@ class Response
     /*
      * If is console output available, write it.
      */
-    public function writeln()
+    public function writeln($separator = false)
     {
         if ( ! $this->message || $this->isError() )
             return $this;
 
-        vpsManager()->getOutput()->writeln($this->message);
+        $separator = ($separator ? "\n" : null);
+
+        vpsManager()->getOutput()->writeln($separator.$this->message.$separator);
 
         return $this;
     }

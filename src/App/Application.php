@@ -3,6 +3,7 @@
 namespace Gogol\VpsManager\App;
 
 use Gogol\VpsManager\App\Helpers\Hosting;
+use Gogol\VpsManager\App\Helpers\MySQL;
 use Gogol\VpsManager\App\Helpers\Nginx;
 use Gogol\VpsManager\App\Helpers\PHP;
 use Gogol\VpsManager\App\Helpers\Response;
@@ -119,6 +120,14 @@ class Application
     public function php()
     {
         return $this->boot(PHP::class);
+    }
+
+    /*
+     * Return PHP helper
+     */
+    public function mysql()
+    {
+        return $this->boot(MySQL::class);
     }
 
     /*

@@ -39,7 +39,7 @@ class Server extends Application
 
         return $this->response()
                     ->success(
-                        'Používateľ bol úspešne vytvorený.'."\n".
+                        '<info>Linuxový používateľ bol úspešne vytvorený.</info>'."\n".
                         'Meno: <comment>'.$user.'</comment>'."\n".
                         'Heslo: <comment>'.$password.'</comment>'
                    );
@@ -92,27 +92,33 @@ class Server extends Application
         if ( !isset($config['www_path']) && $this->existsDomainTree($user) )
             return $this->response()->error('Priečiok '.$web_path.' už existuje.');
 
+        //Check if can change permissions of directory
+        $with_permissions = ! isset($config['no_chmod']);
+
         //If web path has been given, then just change permissions ang group for correct user
-        if ( isset($config['www_path']) ){
+        if ( isset($config['www_path']) && $with_permissions ){
             shell_exec('chmod -R 700 '.$web_path.' && chown -R '.$user.':'.$user.' '.$web_path);
         }
 
         //Create new folders
-        else foreach ([
-            $web_path => 750,
-            $web_path.'/web' => 700,
-            $web_path.'/sub' => 700,
-            $web_path.'/logs' => 750,
-        ] as $path => $permissions)
-        {
-            if ( ! file_exists($path) )
-                shell_exec('mkdir '.$path.' -m '.$permissions.' && chown -R '.$user.':'.$user.' '.$path);
+        else if ( $with_permissions ){
+            foreach ([
+                $web_path => 750,
+                $web_path.'/web' => 700,
+                $web_path.'/sub' => 700,
+                $web_path.'/logs' => 750,
+            ] as $path => $permissions)
+            {
+                if ( ! file_exists($path) )
+                    shell_exec('mkdir '.$path.' -m '.$permissions.' && chown -R '.$user.':'.$user.' '.$path);
 
-            if ( $output = vpsManager()->getOutput() )
-                $output->writeln('Cesta vytvorená: <comment>'.$path.'</comment>');
+                if ( $output = vpsManager()->getOutput() )
+                    $output->writeln('Cesta vytvorená: <comment>'.$path.'</comment>');
+            }
+
         }
 
-        return $this->response()->success('Priečinky boli úspešne vytvorené.');
+        return $this->response()->success('Priečinky webu, jeho práva boli úspešne vytvorené a nastavené.');
     }
 }
 
