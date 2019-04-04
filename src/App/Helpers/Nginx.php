@@ -65,6 +65,9 @@ class Nginx extends Application
 
     public function removeHost($domain)
     {
+        if ( ! isValidDomain($domain) )
+            return false;
+
         if ( file_exists($this->getAvailablePath($domain)) && !@unlink($this->getAvailablePath($domain)) )
             return false;
 
@@ -86,6 +89,33 @@ class Nginx extends Application
             return true;
 
         exec('ln -s '.$this->getAvailablePath($domain).' '.$this->getEnabledPath($domain), $output, $return_var);
+
+        return $return_var == 0 ? true : false;
+    }
+
+    /*
+     * Check if configuration is ok
+     */
+    public function test()
+    {
+        exec('nginx -t 2> /dev/null', $output, $return_var);
+
+        //If nginx has error, then test it again with response
+        if ( $return_var != 0 )
+            exec('nginx -t');
+
+        return $return_var == 0 ? true : false;
+    }
+
+    /*
+     * Restart nginx
+     */
+    public function restart($test_before = true)
+    {
+        if ( $test_before === true && ! $this->test() )
+            return false;
+
+        exec('service nginx restart', $output, $return_var);
 
         return $return_var == 0 ? true : false;
     }

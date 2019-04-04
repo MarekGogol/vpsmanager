@@ -4,11 +4,22 @@ namespace Gogol\VpsManager\App\Traits;
 
 trait PHPSettingsTrait
 {
+    /*
+     * Get available versions
+     */
     public function getVersions()
     {
         return [
             '7.1', '7.2', '7.3'
         ];
+    }
+
+    /*
+     * Check if given php version is valid from supported list
+     */
+    public function isValidPHPVersion($version)
+    {
+        return in_array($version, $this->getVersions());
     }
 
     private function buildOpenBaseDirs($domain, $config)

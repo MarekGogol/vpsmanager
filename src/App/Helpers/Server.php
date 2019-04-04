@@ -120,6 +120,19 @@ class Server extends Application
 
         return $this->response()->success('Priečinok webu <info>'.$web_path.'</info> a jeho práva boli úspešne vytvorené a nastavené.');
     }
+
+    /*
+     * Remove domain tree
+     */
+    public function deleteDomainTree($domain)
+    {
+        if ( ! isValidDomain($domain) )
+            return false;
+
+        $web_path = vpsManager()->getWebPath($domain);
+
+        return system('rm -rf '.$web_path) == 0;
+    }
 }
 
 ?>

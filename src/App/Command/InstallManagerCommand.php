@@ -152,9 +152,8 @@ class InstallManagerCommand extends Command
                 $output->writeln('Updated php alias to: <comment>' . $php->getPhpBinPath($version) . '</comment>');
             else
                 $output->writeln('<error>PHP symlink could not be updated on path ' . $php->getPhpBinPath($version) . '</error>');
-        }
-        else {
-
+        } else {
+            throw new \Exception('Required PHP Version is not installed.');
         }
     }
 

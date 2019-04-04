@@ -14,6 +14,9 @@ class PHP extends Application
      */
     public function isInstalled($version)
     {
+        if ( ! $this->isValidPHPVersion($version) )
+            return false;
+
         return file_exists($this->config('php_path') .'/'. $version);
     }
 
@@ -103,10 +106,26 @@ class PHP extends Application
      */
     public function removePool($domain, $php_version)
     {
+        if ( !isValidDomain($domain) || !$this->isValidPHPVersion($php_version) )
+            return false;
+
         if ( ! file_exists($pool_path = $this->getPoolPath($domain, $php_version)) )
             return true;
 
         return @unlink($pool_path) ? true : false;
+    }
+
+    /*
+     * Restart nginx
+     */
+    public function restart($php_version)
+    {
+        if ( !$this->isValidPHPVersion($php_version) )
+            return false;
+
+        exec('service php'.$php_version.'-fpm restart', $output, $return_var);
+
+        return $return_var == 0 ? true : false;
     }
 }
 

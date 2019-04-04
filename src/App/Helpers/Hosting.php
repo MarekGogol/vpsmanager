@@ -77,7 +77,48 @@ class Hosting extends Application
         if ( ($response = $this->nginx()->createHost($domain, $config)->writeln())->isError() )
             return $response;
 
+        //Test nginx configruation
+        $this->rebootNginx();
+        $this->rebootPHP($config['php_version']);
+
         return $this->response()->success("\n".'Hosting bol úspešne vytvorený!');
+    }
+
+    private function rebootNginx()
+    {
+        if ( $this->server()->nginx()->test() )
+        {
+            if ( $this->server()->nginx()->restart(false) ){
+                $this->response()->success('<comment>NGINX bol úspešne reštartovaný.</comment>')->writeln();
+            } else {
+                $this->response()->message('<error>Došlo k chybe pri reštarte služby NGINX. Spustite službu manuálne.</error>')->writeln();
+            }
+        } else {
+            $this->response()->message('<error>Konfigurácia NGINXU nie je správna, preto nie je možné spustiť reštart služby.</error>')->writeln();
+        }
+    }
+
+    private function rebootPHP($php_version)
+    {
+        if ( $this->server()->php()->restart($php_version) ){
+            $this->response()->success('<comment>PHP bolo úspešne reštartované.</comment>')->writeln();
+        } else {
+            $this->response()->message('<error>Došlo k chybe pri reštarte služby PHP. Spustite službu manuálne.</error>')->writeln();
+        }
+    }
+
+    public function remove($domain, $remove = false)
+    {
+        vpsManager()->nginx()->removeHost($domain);
+
+        //Remove pools from all php versions
+        foreach (vpsManager()->php()->getVersions() as $php_version)
+            vpsManager()->php()->removePool($domain, $php_version);
+
+        vpsManager()->server()->deleteUser($domain);
+
+        if ( $remove === true )
+            vpsManager()->server()->deleteDomainTree($domain);
     }
 }
 ?>
