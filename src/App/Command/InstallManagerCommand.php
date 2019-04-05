@@ -87,12 +87,15 @@ class InstallManagerCommand extends Command
             //Get config inputs
             else {
                 $output->writeln('');
-                $this->{$method}($input, $output, $helper, $config[$data['config_key']], $data['default']);
+                $this->{$method}($input, $output, $helper, $config[$data['config_key']], $data['default'], $config);
             }
         }
 
         if ( ! file_put_contents(vpsManagerPath().'/config.php', "<?php \n\nreturn " . var_export($config, true) . ';') )
             throw new \Exception('Installation failed. Config could not be saved into '.vpsManagerPath().'/config.php');
+
+        //Forced booting config
+        vpsManager()->bootConfig(true);
     }
 
     private function setNginxPath($input, $output, $helper, &$config, $default)
@@ -131,7 +134,7 @@ class InstallManagerCommand extends Command
         $output->writeln('Used path: <comment>' . $value . '</comment>');
     }
 
-    private function setDefaultPHPVersion($input, $output, $helper, &$config, $default)
+    private function setDefaultPHPVersion($input, $output, $helper, &$config, $default, $full_config)
     {
         $output->writeln('<info>Please set default PHP version.</info>');
 
@@ -143,7 +146,7 @@ class InstallManagerCommand extends Command
         $output->writeln('Used version for new websites: <comment>' . $version . '</comment>');
 
         //Check if is PHP Version installed
-        if ( ($php = vpsManager()->php())->isInstalled($version) )
+        if ( ($php = vpsManager()->php())->isInstalled($version, $full_config['php_path']) )
         {
             if ( $php->changeDefaultPHP($version) )
                 $output->writeln('Updated php alias to: <comment>' . $php->getPhpBinPath($version) . '</comment>');
@@ -204,7 +207,7 @@ class InstallManagerCommand extends Command
             return $host;
         });
 
-        $value = $config = $helper->ask($input, $output, $question) ?: $default;
+        $value = $config = ($helper->ask($input, $output, $question) ?: $default);
 
         $output->writeln('Used host: <comment>' . $value . '</comment>');
     }

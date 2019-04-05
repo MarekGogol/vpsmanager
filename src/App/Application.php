@@ -39,10 +39,10 @@ class Application
         return $key ? (array_key_exists($key, $config) ? $config[$key] : null) : $config;
     }
 
-    public function bootConfig()
+    public function bootConfig($force = false)
     {
-        if ( ! $this->config )
-            $this->config = require_once(vpsManagerPath() . '/config.php');
+        if ( ! $this->config || $force === true )
+            $this->config = require(vpsManagerPath() . '/config.php');
 
         return $this->config;
     }

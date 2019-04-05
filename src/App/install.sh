@@ -1,9 +1,14 @@
 MANAGER_PATH=/etc/vpsmanager;
 MANAGER_USER=vpsmanager_host
+WAMP_SETUP_PATH=/root/vps-wamp-setup
 
 # Install server requirements
-git clone https://github.com/MarekGogol/vps-wamp-setup /root/vps-wamp-setup
-bash /root/vps-wamp-setup/setup.sh
+#bash /volumes/ssd/www/root/home/projects/vps_wamp_setup/setup.sh
+git clone https://github.com/MarekGogol/vps-wamp-setup $WAMP_SETUP_PATH
+echo " "
+bash $WAMP_SETUP_PATH/setup.sh
+rm -rf $WAMP_SETUP_PATH
+echo " "
 
 # Create user if does not exists
 if getent passwd $MANAGER_USER > /dev/null 2>&1; then

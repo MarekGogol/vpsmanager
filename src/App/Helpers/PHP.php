@@ -12,12 +12,12 @@ class PHP extends Application
     /*
      * Check if is php version installed
      */
-    public function isInstalled($version)
+    public function isInstalled($version, $php_path = null)
     {
         if ( ! $this->isValidPHPVersion($version) )
             return false;
 
-        return file_exists($this->config('php_path') .'/'. $version);
+        return file_exists(($php_path ?: $this->config('php_path')) .'/'. $version);
     }
 
     /*
