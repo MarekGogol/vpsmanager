@@ -39,12 +39,25 @@ class Application
         return $key ? (array_key_exists($key, $config) ? $config[$key] : null) : $config;
     }
 
+    /*
+     * Boot config data from config file
+     */
     public function bootConfig($force = false)
     {
         if ( ! $this->config || $force === true )
             $this->config = require(vpsManagerPath() . '/config.php');
 
         return $this->config;
+    }
+
+    /*
+     * Boot console in vpsManager and check correct permissions
+     */
+    public function bootConsole($output)
+    {
+        $this->setOutput($output);
+
+        checkPermissions();
     }
 
     /*

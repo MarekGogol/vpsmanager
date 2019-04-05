@@ -29,10 +29,10 @@ class InstallManagerCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        vpsManager()->bootConsole($output);
+
         $this->input = $input;
         $this->output = $output;
-
-        vpsManager()->setOutput($output);
 
         $output->writeln('');
 

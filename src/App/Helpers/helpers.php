@@ -50,3 +50,14 @@ function getRandomPassword($length = 16)
 
     return substr(str_shuffle(str_repeat($pool, 5)), 0, $length);
 }
+
+/*
+ * Check app permissions
+ */
+function checkPermissions()
+{
+    $user = shell_exec('whoami');
+
+    if ( $user !== 'root' )
+        throw new \Exception('This vpsManager can be booted just under root user.');
+}
