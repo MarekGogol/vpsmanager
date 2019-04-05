@@ -97,20 +97,20 @@ class Server extends Application
 
         //If web path has been given, then just change permissions ang group for correct user
         if ( isset($config['www_path']) && $with_permissions ){
-            shell_exec('chmod -R 700 '.$web_path.' && chown -R '.$user.':'.$user.' '.$web_path);
+            shell_exec('chmod -R 710 '.$web_path.' && chown -R '.$user.':www-data '.$web_path);
         }
 
         //Create new folders
         else if ( $with_permissions ){
             foreach ([
-                $web_path => 750,
-                $web_path.'/web' => 700,
-                $web_path.'/sub' => 700,
-                $web_path.'/logs' => 750,
+                $web_path => 710,
+                $web_path.'/web' => 710,
+                $web_path.'/sub' => 710,
+                $web_path.'/logs' => 700,
             ] as $path => $permissions)
             {
                 if ( ! file_exists($path) )
-                    shell_exec('mkdir '.$path.' -m '.$permissions.' && chown -R '.$user.':'.$user.' '.$path);
+                    shell_exec('mkdir '.$path.' -m '.$permissions.' && chown -R '.$user.':www-data '.$path);
 
                 if ( $output = vpsManager()->getOutput() )
                     $output->writeln('Cesta vytvorená: <comment>'.$path.'</comment>');
