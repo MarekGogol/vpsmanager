@@ -77,7 +77,7 @@ class Hosting extends Application
         if ( ($response = $this->nginx()->createHost($domain, $config)->writeln())->isError() )
             return $response;
 
-        //Test nginx configruation
+        //Test and reboot services
         $this->rebootNginx();
         $this->rebootPHP($config['php_version']);
 
@@ -101,9 +101,9 @@ class Hosting extends Application
     private function rebootPHP($php_version)
     {
         if ( $this->server()->php()->restart($php_version) ){
-            $this->response()->success('<comment>PHP bolo úspešne reštartované.</comment>')->writeln();
+            $this->response()->success('<comment>PHP '.$php_version.' FPM bolo úspešne reštartované.</comment>')->writeln();
         } else {
-            $this->response()->message('<error>Došlo k chybe pri reštarte služby PHP. Spustite službu manuálne.</error>')->writeln();
+            $this->response()->error('<error>Došlo k chybe pri reštarte služby PHP. Spustite službu manuálne.</error>')->writeln(null, true);
         }
     }
 
@@ -120,8 +120,10 @@ class Hosting extends Application
         if ( vpsManager()->nginx()->removeHost($domain) )
             $this->response()->success('<comment>NGINX</comment> <info>host has been successfully disabled and removed.<info>')->writeln();
         else
-            $this->response()->message('<error>NGINX host could not be deleted.</error>')->writeln();
+            $this->response()->error('<error>NGINX host could not be deleted.</error>')->writeln(null, true);
 
+        //Which php fpm versions should be rebooted
+        $reboot_php_versions = [];
 
         //Remove pools from all php versions
         foreach (vpsManager()->php()->getVersions() as $php_version)
@@ -130,9 +132,12 @@ class Hosting extends Application
                 continue;
 
             if ( vpsManager()->php()->removePool($domain, $php_version) )
+            {
+                $reboot_php_versions[] = $php_version;
                 $this->response()->success('<comment>PHP '.$php_version.'</comment> <info>pool has been successfuly removed.</info>')->writeln();
-            else
+            } else {
                 $this->response()->message('<error>PHP '.$php_version.' pool could not be deleted.</error>')->writeln();
+            }
         }
 
         //Remove user
@@ -152,6 +157,13 @@ class Hosting extends Application
             else
                 $this->response()->message('<error>Data storage '.vpsManager()->getWebPath($domain).' could not be deleted.</error>')->writeln();
         }
+
+        //Test and reboot services
+        $this->rebootNginx();
+
+        //Rebot all php version from which has been pool removed
+        foreach ($reboot_php_versions as $version)
+            $this->rebootPHP($version);
 
         return $this->response()->success('<info>Hosting has been successfully removed.</info>');
     }
