@@ -68,10 +68,10 @@ class Nginx extends Application
         if ( ! isValidDomain($domain) )
             return false;
 
-        if ( file_exists($this->getAvailablePath($domain)) && !@unlink($this->getAvailablePath($domain)) )
+        if ( file_exists($this->getEnabledPath($domain)) && !@unlink($this->getEnabledPath($domain)) )
             return false;
 
-        if ( file_exists($this->getEnabledPath($domain)) && !@unlink($this->getEnabledPath($domain)) )
+        if ( file_exists($this->getAvailablePath($domain)) && !@unlink($this->getAvailablePath($domain)) )
             return false;
 
         return true;

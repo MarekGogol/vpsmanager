@@ -22,6 +22,7 @@ class InstallManagerCommand extends Command
              ->setDescription('Install VPS Manager')
              ->addOption('dev', null, InputOption::VALUE_OPTIONAL, 'Use dev version of installation', null)
              ->addOption('vpsmanager_path', null, InputOption::VALUE_OPTIONAL, 'Set absolute path of VPS Manager web interface', null)
+             ->addOption('host', null, InputOption::VALUE_OPTIONAL, 'Set host path for VPS Manager web interface', null)
              ->addOption('open_basedir', null, InputOption::VALUE_OPTIONAL, 'Allow open_basedir path for VPS Manager web interface', null)
              ->addOption('no_chmod', null, InputOption::VALUE_OPTIONAL, 'Disable change of chmod settings of web directory', null);
     }
@@ -39,16 +40,12 @@ class InstallManagerCommand extends Command
 
         $this->setConfig($input, $output, $helper);
 
-        //Reset settings for manager web interface
-        if ( $this->isDev($input) )
-            $this->resetManagerHosting();
-
         $this->generateManagerHosting($input, $output);
     }
 
-    public function isDev($input)
+    public function isDev()
     {
-        return $input->getOption('dev') == 1;
+        return $this->input->getOption('dev') == 1;
     }
 
     public function setConfig($input, $output, $helper)
@@ -79,12 +76,12 @@ class InstallManagerCommand extends Command
             ],
             'setHost' => [
                 'config_key' => 'host',
-                'default' => 'vpsmanager.example.com'
+                'default' => $input->getOption('host') ?: 'vpsmanager.example.com'
             ]
         ] as $method => $data)
         {
             //Use default config values
-            if ( $this->isDev($input) )
+            if ( $this->isDev() )
                 $config[$data['config_key']] = $data['default'];
 
             //Get config inputs
@@ -217,7 +214,7 @@ class InstallManagerCommand extends Command
      */
     private function getManagerHost()
     {
-        return 'vps-manager-hs.test' ?: vpsManager()->config('host');
+        return vpsManager()->config('host');
     }
 
     /*
@@ -225,21 +222,13 @@ class InstallManagerCommand extends Command
      */
     private function getManagerPath()
     {
-        return vpsManager()->config('vpsmanager_path');
-    }
+        $path = vpsManager()->config('vpsmanager_path');
 
-    /*
-     * Reset uneccessary settings for creating new hosting with same name
-     * Just for dev purposes
-     */
-    private function resetManagerHosting()
-    {
-        $domain = $this->getManagerHost();
-        $php_version = vpsManager()->config('php_version');
+        //If installation process was initialized from vendor directory, then remove this path from vpsmanager path
+        $path = trim_end($path, '/');
+        $path = trim_end($path, '/vendor/marekgogol/vpsmanager/src/app');
 
-        vpsManager()->nginx()->removeHost($domain);
-        vpsManager()->php()->removePool($domain, $php_version);
-        vpsManager()->server()->deleteUser($domain);
+        return $path;
     }
 
     /*
@@ -248,6 +237,10 @@ class InstallManagerCommand extends Command
     private function generateManagerHosting($input, $output)
     {
         $host_name = $this->getManagerHost();
+
+        //Reset settings for manager web interface
+        if ( $this->isDev($input) )
+            vpsManager()->hosting()->remove($host_name);
 
         if ( ($response = vpsManager()->hosting()->create($host_name, [
             'www_path' => $this->getManagerPath(),
