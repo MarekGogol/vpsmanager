@@ -56,7 +56,7 @@ function getRandomPassword($length = 16)
  */
 function checkPermissions()
 {
-    $user = shell_exec('whoami');
+    $user = trim(shell_exec('whoami'));
 
     if ( $user !== 'root' )
         throw new \Exception('This vpsManager can be booted just under root user.');
