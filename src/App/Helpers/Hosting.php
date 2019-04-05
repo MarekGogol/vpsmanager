@@ -107,18 +107,53 @@ class Hosting extends Application
         }
     }
 
-    public function remove($domain, $remove = false)
+    /**
+     * Delete hosting
+     * @param  string  $domain       [domain name]
+     * @param  boolean $remove_data  [set if www data can be deleted]
+     * @param  boolean $remove_mysql [set if mysql user and database can me deleted]
+     * @return response
+     */
+    public function remove($domain, $remove_data = false, $remove_mysql = false)
     {
-        vpsManager()->nginx()->removeHost($domain);
+        //Remove nginx
+        if ( vpsManager()->nginx()->removeHost($domain) )
+            $this->response()->success('<comment>NGINX</comment> <info>host has been successfully disabled and removed.<info>')->writeln();
+        else
+            $this->response()->message('<error>NGINX host could not be deleted.</error>')->writeln();
+
 
         //Remove pools from all php versions
         foreach (vpsManager()->php()->getVersions() as $php_version)
-            vpsManager()->php()->removePool($domain, $php_version);
+        {
+            if ( ! vpsManager()->php()->poolExists($domain, $php_version) )
+                continue;
 
-        vpsManager()->server()->deleteUser($domain);
+            if ( vpsManager()->php()->removePool($domain, $php_version) )
+                $this->response()->success('<comment>PHP '.$php_version.'</comment> <info>pool has been successfuly removed.</info>')->writeln();
+            else
+                $this->response()->message('<error>PHP '.$php_version.' pool could not be deleted.</error>')->writeln();
+        }
 
-        if ( $remove === true )
-            vpsManager()->server()->deleteDomainTree($domain);
+        //Remove user
+        if ( vpsManager()->server()->deleteUser($domain) )
+            $this->response()->success('<info>User</info> <comment>'.$domain.'</comment> <info>has been successfuly removed.</info>')->writeln();
+        else
+            $this->response()->message('<error>User '.$domain.' could not be deleted.</error>')->writeln();
+
+        //Remove mysql data
+        if ( $remove_mysql )
+            vpsManager()->mysql()->removeDatabaseWithUser($domain)->writeln(null, true);
+
+        if ( $remove_data === true )
+        {
+            if ( vpsManager()->server()->deleteDomainTree($domain) )
+                $this->response()->success('<info>Data storage</info> <comment>'.vpsManager()->getWebPath($domain).'</comment> <info>has been deleted.</info>')->writeln();
+            else
+                $this->response()->message('<error>Data storage '.vpsManager()->getWebPath($domain).' could not be deleted.</error>')->writeln();
+        }
+
+        return $this->response()->success('<info>Hosting has been successfully removed.</info>');
     }
 }
 ?>

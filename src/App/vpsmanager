@@ -3,6 +3,7 @@
 require_once 'vendor/autoload.php';
 
 use Gogol\VpsManager\App\Command\HostingCreateCommand;
+use Gogol\VpsManager\App\Command\HostingRemoveCommand;
 use Gogol\VpsManager\App\Command\InstallManagerCommand;
 use Symfony\Component\Console\Application;
 
@@ -12,6 +13,7 @@ $application = new Application();
 
 $application->add(new InstallManagerCommand());
 $application->add(new HostingCreateCommand());
+$application->add(new HostingRemoveCommand());
 
 $application->run();
 ?>

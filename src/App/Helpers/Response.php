@@ -67,9 +67,9 @@ class Response
     /*
      * If is console output available, write it.
      */
-    public function writeln($separator = false)
+    public function writeln($separator = false, $with_error = false)
     {
-        if ( ! $this->message || $this->isError() )
+        if ( ! $this->message || ($this->isError() && $with_error === false) )
             return $this;
 
         $separator = ($separator ? "\n" : null);
