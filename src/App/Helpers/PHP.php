@@ -43,7 +43,7 @@ class PHP extends Application
      */
     public function getSocketName($domain, $php_version)
     {
-        return 'php'.$php_version.'-fpm-'.$domain;
+        return 'php'.$php_version.'-fpm-'.$this->toUserFormat($domain);
     }
 
     /*
@@ -51,7 +51,7 @@ class PHP extends Application
      */
     public function getPoolPath($domain, $php_version)
     {
-        return $this->config('php_path').'/'.$php_version.'/fpm/pool.d/'.$domain.'.conf';
+        return $this->config('php_path').'/'.$php_version.'/fpm/pool.d/'.$this->toUserFormat($domain).'.conf';
     }
 
     /*
@@ -72,6 +72,8 @@ class PHP extends Application
     {
         $php_version = $config['php_version'];
 
+        $user = $this->toUserFormat($domain);
+
         if ( ! in_array($php_version, $this->getVersions()) )
             return $this->response()->error('Zadali ste nesprávnu verziu PHP');
 
@@ -82,11 +84,11 @@ class PHP extends Application
             return $this->response()->error('PHP s verziou '.$php_version.' nie je nainštalované.');
 
         if ( $this->poolExists($domain, $php_version) )
-            return $this->response()->error('PHP Pool s názvom '.$domain.'.conf pre verziu PHP '.$php_version.' už existuje.');
+            return $this->response()->error('PHP Pool s názvom '.$user.'.conf pre verziu PHP '.$php_version.' už existuje.');
 
         $stub = $this->getStub('php-pool.conf');
 
-        $stub->replace('{{user}}', $domain);
+        $stub->replace('{{user}}', $user);
         $stub->replace('{{version}}', $php_version);
         $stub->replace('{{socket_name}}', $this->getSocketName($domain, $php_version));
 

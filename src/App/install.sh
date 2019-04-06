@@ -47,4 +47,4 @@ echo "> Changed permisions of $MANAGER_PATH to 700"
 su - $MANAGER_USER -c "composer install -d $MANAGER_PATH"
 
 # Start installation process
-php $MANAGER_PATH/vpsmanager install --vpsmanager_path=`pwd`
+php $MANAGER_PATH/vpsmanager install --vpsmanager_path=`pwd` --host=docker.marekgogol.sk --open_basedir=/volumes --no_chmod=1

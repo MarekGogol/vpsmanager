@@ -21,6 +21,8 @@ class HostingCreateCommand extends Command
     {
         $this->setName('hosting:create')
              ->setDescription('Create new hosting with full php/mysql/nginx setup')
+             ->addOption('domain', null, InputOption::VALUE_OPTIONAL, 'Domain name', null)
+             ->addOption('php_version', null, InputOption::VALUE_OPTIONAL, 'PHP Version', null)
              ->addOption('dev', null, InputOption::VALUE_OPTIONAL, 'Use dev version of command', null);
     }
 
@@ -45,7 +47,7 @@ class HostingCreateCommand extends Command
 
     public function getDomainName()
     {
-        $question = new Question('Please fill domain name of your new hosting (eg. <info>example.com</info>): ', null);
+        $question = new Question('Please fill domain name of your new hosting (eg. <info>example.com</info>): ', $this->input->getOption('domain'));
         $question->setValidator(function($host) {
             if ( ! $host || ! isValidDomain($host) )
                 throw new \Exception('Please fill valid domain name.');

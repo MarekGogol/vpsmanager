@@ -23,6 +23,8 @@ class Server extends Application
         if ( ! isValidDomain($user) )
             return $this->response()->wrongDomainName();
 
+        $user = $this->toUserFormat($user);
+
         //Check if user exists
         if ( $this->existsUser($user) )
             return $this->response()->error('LINUX používateľ '.$user.' už existuje.');
@@ -54,6 +56,8 @@ class Server extends Application
         if ( ! isValidDomain($user) )
             return false;
 
+        $user = $this->toUserFormat($user);
+
         if ( ! $this->existsUser($user) )
             return true;
 
@@ -77,45 +81,45 @@ class Server extends Application
     /*
      * Create directory tree for domain
      */
-    public function createDomainTree($user, $config = null)
+    public function createDomainTree($domain, $config = null)
     {
-        if ( ! isValidDomain($user) )
+        $user = $this->toUserFormat($domain);
+
+        if ( ! isValidDomain($domain) )
             return $this->response()->wrongDomainName();
 
-        $web_path = $this->getWebPath($user, $config);
-
-        //If is given www path from config, validate if exists
-        if ( isset($config['www_path']) && $this->existsDomainTree($user, $config) )
-            return $this->response()->error('Priečiok '.$web_path.' už neexistuje.');
-
-        //If we want create new web directory, first check if path exists
-        if ( !isset($config['www_path']) && $this->existsDomainTree($user) )
-            return $this->response()->error('Priečiok '.$web_path.' už existuje.');
+        $web_path = $this->getWebPath($domain, $config);
 
         //Check if can change permissions of directory
         $with_permissions = ! isset($config['no_chmod']);
 
-        //If web path has been given, then just change permissions ang group for correct user
-        if ( isset($config['www_path']) && $with_permissions ){
-            shell_exec('chmod -R 710 '.$web_path.' && chown -R '.$user.':www-data '.$web_path);
-        }
+        $paths = [
+            $web_path => 710,
+            $web_path.'/web' => 710,
+            $web_path.'/sub' => 710,
+            $web_path.'/logs' => 700,
+        ];
+
+        //Create subdomain
+        if ( $sub = $this->getSubdomain($domain) )
+            $paths[$web_path.'/sub/'.$sub] = 710;
+
+        //If path has been given
+        if ( isset($config['www_path']) )
+            $paths = [ $config['www_path'] ];
 
         //Create new folders
-        else if ( $with_permissions ){
-            foreach ([
-                $web_path => 710,
-                $web_path.'/web' => 710,
-                $web_path.'/sub' => 710,
-                $web_path.'/logs' => 700,
-            ] as $path => $permissions)
-            {
-                if ( ! file_exists($path) )
-                    shell_exec('mkdir '.$path.' -m '.$permissions.' && chown -R '.$user.':www-data '.$path);
+        foreach ($paths as $path => $permissions)
+        {
+            if ( ! file_exists($path) ){
+                shell_exec('mkdir '.$path);
 
-                if ( $output = vpsManager()->getOutput() )
-                    $output->writeln('Cesta vytvorená: <comment>'.$path.'</comment>');
+                $this->response()->message('Cesta vytvorená: <comment>'.$path.'</comment>')->writeln();
             }
 
+            //Change permissions
+            if ( $with_permissions )
+                shell_exec('chmod '.$permissions.' -R '.$path.' && chown -R '.$user.':www-data '.$path);
         }
 
         return $this->response()->success('Priečinok webu <info>'.$web_path.'</info> a jeho práva boli úspešne vytvorené a nastavené.');

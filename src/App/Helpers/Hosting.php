@@ -20,9 +20,6 @@ class Hosting extends Application
         if ( $this->server()->existsUser($domain) )
             return $this->response()->error('LINUX používateľ '.$domain.' už existuje.');
 
-        if ( $this->server()->existsDomainTree($domain, $config) && !isset($config['www_path']) )
-            return $this->response()->error('Stromova šruktúra pre web '.$domain.' už existuje.');
-
         if ( ! $this->php()->isInstalled($config['php_version']) )
             return $this->response()->error('PHP s verziou '.$config['php_version'].' nie je nainštalované.');
 

@@ -143,6 +143,19 @@ class Application
         return $this->boot(MySQL::class);
     }
 
+    public function getSubdomain($domain)
+    {
+        if ( count($parts = $this->getDomainParts($domain)) == 3 )
+            return $parts[0];
+
+        return false;
+    }
+
+    public function getDomainParts($domain)
+    {
+        return explode('.', $domain);
+    }
+
     /*
      * Return web path
      */
@@ -151,6 +164,17 @@ class Application
         if ( isset($config['www_path']) )
             return $config['www_path'];
 
-        return $this->config('www_path') . '/' . $domain;
+        return $this->config('www_path') . '/' . $this->server()->toUserFormat($domain);
+    }
+
+    /*
+     * From domain to user format
+     * removes subdomains
+     */
+    public function toUserFormat($domain)
+    {
+        $parts = explode('.', $domain);
+
+        return implode('.', array_slice($parts, -2));
     }
 }

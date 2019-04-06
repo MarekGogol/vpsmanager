@@ -14,19 +14,19 @@ class Nginx extends Application
         if ( ! isValidDomain($domain) )
             return false;
 
-        $path = $this->config('nginx_path').'/sites-available/'.$domain;
+        $path = $this->config('nginx_path').'/sites-available/'.$this->toUserFormat($domain);
 
         return file_exists($path);
     }
 
     public function getAvailablePath($domain)
     {
-        return $this->config('nginx_path').'/sites-available/'.$domain;
+        return $this->config('nginx_path').'/sites-available/'.$this->toUserFormat($domain);
     }
 
     public function getEnabledPath($domain)
     {
-        return $this->config('nginx_path').'/sites-enabled/'.$domain;
+        return $this->config('nginx_path').'/sites-enabled/'.$this->toUserFormat($domain);
     }
 
     /**
