@@ -28,11 +28,11 @@ class HostingCreateCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        vpsManager()->bootConsole($output);
-
         $this->input = $input;
         $this->output = $output;
         $this->helper = $this->getHelper('question');;
+
+        vpsManager()->bootConsole($output, $input, $this->helper);
 
         $domain = $this->getDomainName();
         $php_version = $this->getPHPVersion();

@@ -11,7 +11,7 @@ class Server extends Application
      */
     public function existsUser($user)
     {
-        return shell_exec('getent passwd '.$user) ? true : false;
+        return shell_exec('getent passwd '.$this->toUserFormat($user)) ? true : false;
     }
 
     /*
@@ -27,7 +27,7 @@ class Server extends Application
 
         //Check if user exists
         if ( $this->existsUser($user) )
-            return $this->response()->error('LINUX používateľ '.$user.' už existuje.');
+            return $this->response();
 
         //Web path
         $web_path = $this->getWebPath($user);
@@ -37,13 +37,13 @@ class Server extends Application
         //Create new linux user
         exec('useradd -s /bin/bash -d '.$web_path.' -U '.$user.' -p $(openssl passwd -1 '.$password.')', $output, $return_var);
         if ( $return_var != 0 )
-            return $this->response()->error('Používateľa nebolo možné vytvoriť.');
+            return $this->response()->error('User could not be created.');
 
         return $this->response()
                     ->success(
-                        '<info>Linuxový používateľ bol úspešne vytvorený.</info>'."\n".
-                        'Meno: <comment>'.$user.'</comment>'."\n".
-                        'Heslo: <comment>'.$password.'</comment>'
+                        '<info>Linux user has been successfully created.</info>'."\n".
+                        'User: <comment>'.$user.'</comment>'."\n".
+                        'Password: <comment>'.$password.'</comment>'
                    );
     }
 
@@ -114,7 +114,7 @@ class Server extends Application
             if ( ! file_exists($path) ){
                 shell_exec('mkdir '.$path);
 
-                $this->response()->message('Cesta vytvorená: <comment>'.$path.'</comment>')->writeln();
+                $this->response()->message('Directory created: <comment>'.$path.'</comment>')->writeln();
             }
 
             //Change permissions
@@ -122,7 +122,7 @@ class Server extends Application
                 shell_exec('chmod '.$permissions.' -R '.$path.' && chown -R '.$user.':www-data '.$path);
         }
 
-        return $this->response()->success('Priečinok webu <info>'.$web_path.'</info> a jeho práva boli úspešne vytvorené a nastavené.');
+        return $this->response()->success('Directory <info>'.$web_path.'</info> has been successfully setted up.');
     }
 
     /*

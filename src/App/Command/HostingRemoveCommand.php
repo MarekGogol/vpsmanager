@@ -26,11 +26,11 @@ class HostingRemoveCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        vpsManager()->bootConsole($output);
-
         $this->input = $input;
         $this->output = $output;
         $this->helper = $this->getHelper('question');;
+
+        vpsManager()->bootConsole($output, $input, $this->helper);
 
         $domain = $this->getDomainName();
         $output->writeln('');

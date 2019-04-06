@@ -23,9 +23,11 @@ class Application
     protected $config = null;
 
     /*
-     * Console output
+     * Console properties
      */
-    private $output = null;
+    public $output = null;
+    public $input = null;
+    public $helper = null;
 
 
     /*
@@ -53,19 +55,18 @@ class Application
     /*
      * Boot console in vpsManager and check correct permissions
      */
-    public function bootConsole($output)
+    public function bootConsole($output, $input = null, $helper = null)
     {
-        $this->setOutput($output);
+        if ( $output )
+            $this->output = $output;
+
+        if ( $input )
+            $this->input = $input;
+
+        if ( $helper )
+            $this->helper = $helper;
 
         checkPermissions();
-    }
-
-    /*
-     * Set console output
-     */
-    public function setOutput($output)
-    {
-        $this->output = $output;
     }
 
     /*

@@ -84,7 +84,7 @@ class PHP extends Application
             return $this->response()->error('PHP s verziou '.$php_version.' nie je nainštalované.');
 
         if ( $this->poolExists($domain, $php_version) )
-            return $this->response()->error('PHP Pool s názvom '.$user.'.conf pre verziu PHP '.$php_version.' už existuje.');
+            return $this->response();
 
         $stub = $this->getStub('php-pool.conf');
 

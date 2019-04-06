@@ -11,22 +11,88 @@ class Hosting extends Application
      */
     public function checkErrorsBeforeCreate(string $domain, $config)
     {
+        $user = $this->toUserFormat($domain);
+
         if ( ! isValidDomain($domain) )
             return $this->response()->wrongDomainName();
 
-        if ( $this->nginx()->exists($domain) )
-            return $this->response()->error('Nginx nastavenia pre dómenu '.$domain.' už existuju.');
+        if ( $this->nginx()->exists($domain) && ! $this->canContinueNginx($user) ){
+            return $this->response()->error('Nginx nastavenia pre dómenu '.$user.' už existuju.');
+        }
 
-        if ( $this->server()->existsUser($domain) )
-            return $this->response()->error('LINUX používateľ '.$domain.' už existuje.');
+        //Check if can continue with existing user
+        if ( $this->server()->existsUser($user) && ! $this->canContinueUser($user) ) {
+            return $this->response()->error('LINUX používateľ '.$user.' už existuje.');
+        }
 
         if ( ! $this->php()->isInstalled($config['php_version']) )
             return $this->response()->error('PHP s verziou '.$config['php_version'].' nie je nainštalované.');
 
-        if ( $this->php()->poolExists($domain, $config['php_version']) )
+        //Check if can continue with existing PHP pool configuration
+        if (
+            $this->php()->poolExists($domain, $config['php_version'])
+            && ! $this->canContinuePool($user, $config['php_version'])
+        )
             return $this->response()->error('PHP Pool s názvom '.$domain.'.conf pre verziu PHP '.$config['php_version'].' už existuje.');
 
         return $this->response();
+    }
+
+    /*
+     * Check if can continue with existing user
+     */
+    private function canContinueUser($user)
+    {
+        $m = vpsManager();
+
+        //If console is not booted properly
+        if ( !($m->output && $m->input && $m->helper) )
+            return false;
+
+        $question = new \Symfony\Component\Console\Question\ConfirmationQuestion(
+            "\n".'<error>User '.$user.' exists already.</error>'."\n".
+            'Would you like continue with existing user? (y/N) '
+        , false);
+
+        return $m->helper->ask($m->input, $m->output, $question);
+    }
+
+    /*
+     * Check if can continue with existing nginx
+     */
+    private function canContinueNginx($user)
+    {
+        $m = vpsManager();
+
+        //If console is not booted properly
+        if ( !($m->output && $m->input && $m->helper) )
+            return false;
+
+        $question = new \Symfony\Component\Console\Question\ConfirmationQuestion(
+            "\n".'<error>Webhosting '.$user.' already exists and has NGINX configruation.</error>'."\n".
+            'Would you like use this <comment>'.$this->nginx()->getAvailablePath($user).'</comment> configuration? (y/N) '
+        , false);
+
+        return $m->helper->ask($m->input, $m->output, $question);
+    }
+
+    /*
+     * Check if can continue with existing nginx
+     */
+    private function canContinuePool($user, $php_version)
+    {
+        $m = vpsManager();
+
+        //If console is not booted properly
+        if ( !($m->output && $m->input && $m->helper) )
+            return false;
+
+        $question = new \Symfony\Component\Console\Question\ConfirmationQuestion(
+            "\n".'<error>PHP '.$php_version.' Pool for domain name '.$user.' exists already.</error>'."\n".
+            'Would you like use this <comment>'.$this->php()->getPoolPath($user, $php_version).'</comment> configuration? (y/N) '
+        , false);
+
+        return $m->helper->ask($m->input, $m->output, $question);
     }
 
     /*

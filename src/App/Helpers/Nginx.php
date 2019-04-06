@@ -44,6 +44,10 @@ class Nginx extends Application
         if ( ! in_array($php_version = $config['php_version'], $this->php()->getVersions()) )
             return $this->response()->error('Zadali ste nesprávnu verziu PHP');
 
+        //Skip creating when nginx exists
+        if ( $this->exists($domain) )
+            return $this->response();
+
         $www_path = isset($config['www_path'])
                         ? $config['www_path'].'/public'
                         : ($this->getWebPath($domain).'/web/public');
