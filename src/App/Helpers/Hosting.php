@@ -70,7 +70,7 @@ class Hosting extends Application
 
         $question = new \Symfony\Component\Console\Question\ConfirmationQuestion(
             "\n".'<error>Webhosting '.$user.' already exists and has NGINX configruation.</error>'."\n".
-            'Would you like use this <comment>'.$this->nginx()->getAvailablePath($user).'</comment> configuration? (y/N) '
+            'Would you like use this existing <comment>'.$this->nginx()->getAvailablePath($user).'</comment> configuration? (y/N) '
         , false);
 
         return $m->helper->ask($m->input, $m->output, $question);
@@ -89,7 +89,7 @@ class Hosting extends Application
 
         $question = new \Symfony\Component\Console\Question\ConfirmationQuestion(
             "\n".'<error>PHP '.$php_version.' Pool for domain name '.$user.' exists already.</error>'."\n".
-            'Would you like use this <comment>'.$this->php()->getPoolPath($user, $php_version).'</comment> configuration? (y/N) '
+            'Would you like use this existing <comment>'.$this->php()->getPoolPath($user, $php_version).'</comment> configuration? (y/N) '
         , false);
 
         return $m->helper->ask($m->input, $m->output, $question);

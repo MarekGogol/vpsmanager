@@ -8,6 +8,11 @@ class Stub extends Application
 {
     protected $content;
 
+    public function __toString()
+    {
+        return $this->render();
+    }
+
     public function __construct($name = null)
     {
         if ($name)
@@ -20,6 +25,15 @@ class Stub extends Application
     public function load($name)
     {
         $this->content = file_get_contents(__DIR__ . '/../Stub/' . $name);
+
+        return $this;
+    }
+
+    public function addFile($name, $separator = null)
+    {
+        $this->content = $this->content . ($this->content ? ($separator ?: "\n") : '') . file_get_contents(__DIR__ . '/../Stub/' . $name);
+
+        return $this;
     }
 
     /*
@@ -28,11 +42,15 @@ class Stub extends Application
     public function replace($key, $value)
     {
         $this->content = str_replace($key, $value, $this->content);
+
+        return $this;
     }
 
     public function addLine($line)
     {
         $this->content .= "\n".$line;
+
+        return $this;
     }
 
     public function render()

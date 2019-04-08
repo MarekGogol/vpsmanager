@@ -29,6 +29,26 @@ class Nginx extends Application
         return $this->config('nginx_path').'/sites-enabled/'.$this->toUserFormat($domain);
     }
 
+    public function cloneNginxSettins()
+    {
+        $nginx_path = $this->config('nginx_path');
+
+        if ( ! file_exists($nginx_path.'/vpsmanager') )
+        {
+            exec('cp -Rf '.__DIR__.'/../Resources/nginx/vpsmanager '.$nginx_path.'/vpsmanager', $output, $return_var);
+            exec('cp -f '.__DIR__.'/../Resources/nginx/nginx.conf '.$nginx_path.'/nginx.conf', $output1, $return_var1);
+
+            if ( $return_var == 0 && $return_var == 0 )
+                $this->response()->success('<info>NGINX configuration files has been successfully copied.</info>')->writeln(null, true);
+            else {
+                $this->response()->error(
+                    '<error>NGINX configuration files could not be copied.</error>'."\n".
+                    'Please copy <comment>./Resources/nginx</comment> directory from this package to <comment>/etc/nginx</comment>'
+                )->writeln(null, true);
+            }
+        }
+    }
+
     /**
      * Create new host
      * @param  string $domain
@@ -48,15 +68,9 @@ class Nginx extends Application
         if ( $this->exists($domain) )
             return $this->response();
 
-        $www_path = isset($config['www_path'])
-                        ? $config['www_path'].'/public'
-                        : ($this->getWebPath($domain).'/web/public');
+        $this->cloneNginxSettins();
 
-        $stub = $this->getStub('nginx.template.conf');
-        $stub->replace('{host}', $domain);
-        $stub->replace('{path}', $www_path);
-        $stub->replace('{php_version}', $php_version);
-        $stub->replace('{php_sock_name}', $this->php()->getSocketName($domain, $php_version));
+        $stub = $this->generateNginxHostStub($domain, $config, $php_version);
 
         if ( ! $stub->save($this->getAvailablePath($domain)) )
             return $this->response()->error('Súbor NGINX host sa nepodarilo uložiť.');
@@ -65,6 +79,49 @@ class Nginx extends Application
             return $this->response()->error('Nepodarilo sa vytvoriť odkaz na host v priečinku sites-enabled.');
 
         return $this->response()->success('NGINX host <info>'.$domain.'</info> bol úspešne vytvorený.');
+    }
+
+    private function generateNginxHostStub($domain, $config, $php_version)
+    {
+        $www_path = isset($config['www_path'])
+                        ? $config['www_path'].'/public'
+                        : ($this->getWebPath($domain).'/web/public');
+
+        //Create redirect from non www to www
+        $redirect_stub = clone ($stub = $this->getStub('nginx.redirect.conf'));
+        $stub->replace('{from-host}', $this->toUserFormat($domain));
+        $stub->replace('{to-host}', 'www.'.$this->toUserFormat($domain));
+
+        //Add default nginx host configuration
+        $stub->addLine("\n".($host_stub = $this->getStub('nginx.template.conf')));
+        $stub->replace('{host}', 'www.'.$this->toUserFormat($domain));
+        $stub->replace('{path}', $www_path);
+        $stub->replace('{php_version}', $php_version);
+        $stub->replace('{php_sock_name}', $this->php()->getSocketName($domain, $php_version));
+
+        $this->addSubdomainSupport($domain, $stub, $host_stub, $redirect_stub, $php_version);
+
+        return $stub;
+    }
+
+    private function addSubdomainSupport($domain, $stub, $sub_stub, $redirect_stub, $php_version)
+    {
+        //If is regular hosting, then allow auto subdomains
+        if ( isset($config['www_path']) )
+            return;
+
+        $first_level_domain = $this->toUserFormat($domain);
+
+        $redirect_stub->replace('{from-host}', '"~^www\.(?<sub>.+)\.'.str_replace('.', '\.', $first_level_domain).'$"');
+        $redirect_stub->replace('{to-host}', '$sub.'.$first_level_domain);
+        $stub->addLine("\n".$redirect_stub);
+
+        $sub_stub->replace('{host}', '"~^(?<sub>.+)\.'.str_replace('.', '\.', $first_level_domain).'$"');
+        $sub_stub->replace('{path}', $this->getWebPath($domain).'/sub/$sub/public');
+        $sub_stub->replace('{php_version}', $php_version);
+        $sub_stub->replace('{php_sock_name}', $this->php()->getSocketName($domain, $php_version));
+
+        $stub->addLine("\n".$sub_stub);
     }
 
     public function removeHost($domain)

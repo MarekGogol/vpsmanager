@@ -96,23 +96,30 @@ class Server extends Application
         $paths = [
             $web_path => 710,
             $web_path.'/web' => 710,
+            $web_path.'/web/public' => 710,
             $web_path.'/sub' => 710,
             $web_path.'/logs' => 700,
         ];
 
         //Create subdomain
-        if ( $sub = $this->getSubdomain($domain) )
+        if ( $sub = $this->getSubdomain($domain) ) {
             $paths[$web_path.'/sub/'.$sub] = 710;
+            $paths[$web_path.'/sub/'.$sub.'/public'] = 710;
+        }
 
         //If path has been given
         if ( isset($config['www_path']) )
-            $paths = [ $config['www_path'] ];
+            $paths = [ $config['www_path'] => 710 ];
 
         //Create new folders
         foreach ($paths as $path => $permissions)
         {
             if ( ! file_exists($path) ){
                 shell_exec('mkdir '.$path);
+
+                if ( substr($path, -7) == '/public' ){
+                    $this->getStub('hello.php')->replace('{user}', $domain)->save($path . '/index.php');
+                }
 
                 $this->response()->message('Directory created: <comment>'.$path.'</comment>')->writeln();
             }
