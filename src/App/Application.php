@@ -2,6 +2,7 @@
 
 namespace Gogol\VpsManager\App;
 
+use Gogol\VpsManager\App\Helpers\Certbot;
 use Gogol\VpsManager\App\Helpers\Hosting;
 use Gogol\VpsManager\App\Helpers\MySQL;
 use Gogol\VpsManager\App\Helpers\Nginx;
@@ -126,6 +127,14 @@ class Application
     public function nginx()
     {
         return $this->boot(Nginx::class);
+    }
+
+    /*
+     * Return Certbot helper
+     */
+    public function certbot()
+    {
+        return $this->boot(Certbot::class);
     }
 
     /*

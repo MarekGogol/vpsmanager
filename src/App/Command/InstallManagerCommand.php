@@ -40,7 +40,10 @@ class InstallManagerCommand extends Command
 
         $this->setConfig($input, $output, $helper);
 
-        $this->generateManagerHosting($input, $output);
+        // $this->generateManagerHosting($input, $output);
+
+        $output->writeln('');
+        $output->writeln('<info>Installation of</info> <comment>VPS Manager</comment> <info>has been successfully completed.</info>');
     }
 
     public function isDev()
@@ -62,22 +65,30 @@ class InstallManagerCommand extends Command
                 'config_key' => 'php_path',
                 'default' => '/etc/php'
             ],
+            'setSSLPath' => [
+                'config_key' => 'ssl_path',
+                'default' => '/etc/letsencrypt/live'
+            ],
+            'setSSLEmail' => [
+                'config_key' => 'ssl_email',
+                'default' => null,
+            ],
             'setDefaultPHPVersion' => [
                 'config_key' => 'php_version',
                 'default' => '7.2'
             ],
-            'setVpsManagerPath' => [
-                'config_key' => 'vpsmanager_path',
-                'default' => $input->getOption('vpsmanager_path') ?: null,
-            ],
+            // 'setVpsManagerPath' => [
+            //     'config_key' => 'vpsmanager_path',
+            //     'default' => $input->getOption('vpsmanager_path') ?: null,
+            // ],
             'setWWWPath' => [
                 'config_key' => 'www_path',
                 'default' => '/var/www'
             ],
-            'setHost' => [
-                'config_key' => 'host',
-                'default' => $input->getOption('host') ?: 'vpsmanager.example.com'
-            ]
+            // 'setHost' => [
+            //     'config_key' => 'host',
+            //     'default' => $input->getOption('host') ?: 'vpsmanager.example.com'
+            // ]
         ] as $method => $data)
         {
             //Use default config values
@@ -132,6 +143,42 @@ class InstallManagerCommand extends Command
         $value = $config = $helper->ask($input, $output, $question) ?: $default;
 
         $output->writeln('Used path: <comment>' . $value . '</comment>');
+    }
+
+    private function setSSLPath($input, $output, $helper, &$config, $default)
+    {
+        $output->writeln('<info>Please set SSL ceriticates path.</info>');
+
+        //SSL path
+        $question = new Question('Type new path or press enter for using default <comment>'.$default.'</comment> path: ', null);
+        $question->setValidator(function($path) {
+            if ( $path && ! file_exists($path) )
+                throw new \Exception('Please fill valid existing path.');
+
+            return trim_end($path, '/');
+        });
+
+        $value = $config = $helper->ask($input, $output, $question) ?: $default;
+
+        $output->writeln('Used path: <comment>' . $value . '</comment>');
+    }
+
+    private function setSSLEmail($input, $output, $helper, &$config, $default)
+    {
+        $output->writeln('<info>Please set Email for SSL ceriticates generation.</info>');
+
+        //Nginx path
+        $question = new Question('Type email adress for generating SSL certificate via certbot: ', null);
+        $question->setValidator(function($email) {
+            if ( ! isValidEmail($email) )
+                throw new \Exception('Please fill valid email address.');
+
+            return $email;
+        });
+
+        $value = $config = $helper->ask($input, $output, $question) ?: $default;
+
+        $output->writeln('Used email: <comment>' . $value . '</comment>');
     }
 
     private function setDefaultPHPVersion($input, $output, $helper, &$config, $default, $full_config)

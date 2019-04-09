@@ -147,7 +147,7 @@ class Hosting extends Application
         return $this->response()->success("\n".'Hosting bol úspešne vytvorený!');
     }
 
-    private function rebootNginx()
+    public function rebootNginx()
     {
         if ( $this->server()->nginx()->test() )
         {
@@ -161,7 +161,7 @@ class Hosting extends Application
         }
     }
 
-    private function rebootPHP($php_version)
+    public function rebootPHP($php_version)
     {
         if ( $this->server()->php()->restart($php_version) ){
             $this->response()->success('<comment>PHP '.$php_version.' FPM bolo úspešne reštartované.</comment>')->writeln();

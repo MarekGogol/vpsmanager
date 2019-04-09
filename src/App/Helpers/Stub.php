@@ -53,6 +53,13 @@ class Stub extends Application
         return $this;
     }
 
+    public function addLineBefore($line)
+    {
+        $this->content = $line."\n".$this->content;
+
+        return $this;
+    }
+
     public function render()
     {
         return $this->content;

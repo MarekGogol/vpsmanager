@@ -89,11 +89,16 @@ class Nginx extends Application
 
         //Create redirect from non www to www
         $redirect_stub = clone ($stub = $this->getStub('nginx.redirect.conf'));
+        $stub->addLineBefore(
+            '# NGINX host configuration for '.$this->toUserFormat($domain).' by VPS Manager.'."\n".
+            '# Please do not delete any comments before server {} sections. Automated scripts are related to this comments.'."\n\n".
+            '# Default domain redirect (non www to www)'
+        );
         $stub->replace('{from-host}', $this->toUserFormat($domain));
         $stub->replace('{to-host}', 'www.'.$this->toUserFormat($domain));
 
         //Add default nginx host configuration
-        $stub->addLine("\n".($host_stub = $this->getStub('nginx.template.conf')));
+        $stub->addLine("\n".(clone ($host_stub = $this->getStub('nginx.template.conf')))->addLineBefore('# Default host configuration'));
         $stub->replace('{host}', 'www.'.$this->toUserFormat($domain));
         $stub->replace('{path}', $www_path);
         $stub->replace('{php_version}', $php_version);
@@ -136,6 +141,20 @@ class Nginx extends Application
             return false;
 
         return true;
+    }
+
+    /*
+     * Return nginx section by comments
+     */
+    public function getSection($comment, $conf)
+    {
+        $regex = '#\#\s?'.preg_quote($comment).'\nserver\s?\{[\s\S]*?\n\}#i';
+        preg_match($regex, $conf, $matches);
+
+        if ( count($matches) == 0 )
+            return false;
+
+        return trim($matches[0]);
     }
 
     /*

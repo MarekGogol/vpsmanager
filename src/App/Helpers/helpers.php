@@ -21,13 +21,18 @@ function vpsManager()
     return $vpsmanager = new Gogol\VpsManager\App\Application;
 }
 
-function isValidDomain(string $domain)
+function isValidDomain($domain = null)
 {
     //We want at least one domain name
     if ( strpos($domain, '.') === false )
         return false;
 
     return filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME);
+}
+
+function isValidEmail($email = null)
+{
+    return filter_var($email, FILTER_VALIDATE_EMAIL);
 }
 
 if ( ! function_exists('trim_end') ) {
